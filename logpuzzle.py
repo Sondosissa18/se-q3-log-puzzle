@@ -13,6 +13,7 @@ Here's what a puzzle URL looks like (spread out onto multiple lines):
 HTTP/1.0" 302 528 "-" "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US;
 rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6"
 """
+__author__ = "sondos got help from gabby, Jt and joseph"
 
 import os
 import re
@@ -26,8 +27,19 @@ def read_urls(filename):
     extracting the hostname from the filename itself, sorting
     alphabetically in increasing order, and screening out duplicates.
     """
-    # +++your code here+++
-    pass
+    puzzleURLs = []
+    with open(filename) as f:
+        s = filename.find('_')
+        url = filename[s + 1::]
+        for lines in f:
+            urls_search = re.search(r"GET\s(\S*)", lines)
+            # if urls_search:
+            #     print(urls_search.group(1))
+            if '/puzzle' in urls_search.group(1):
+                url_ = f'http://{url}{urls_search.group(1)}'
+                if url_ not in puzzleURLs:
+                    puzzleURLs.append(f'{url_}')
+    return sorted(puzzleURLs, key=lambda u: u[-8:-4])
 
 
 def download_images(img_urls, dest_dir):
@@ -38,8 +50,18 @@ def download_images(img_urls, dest_dir):
     to show each local image file.
     Creates the directory if necessary.
     """
-    # +++your code here+++
-    pass
+    if not os.path.exists(dest_dir):
+        os.makedirs(dest_dir)
+    # img_urls = []
+    with open("index.html", "w") as f:
+        f.write('<html><body>')
+        for i, url in enumerate(img_urls):
+            urllib.request.urlretrieve(
+                url, os.path.join(dest_dir, "img" + str(i) + ".jpg"))
+            # f.write(f'<img src="{url}">')
+            f.write(f'<img src="./{dest_dir}/img{str(i)}.jpg">')
+        f.write('</body></html>')
+        # f.write("<html><body>{0}</body></html>".format(''.join(img_)))
 
 
 def create_parser():
@@ -47,7 +69,8 @@ def create_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--todir',
                         help='destination directory for downloaded images')
-    parser.add_argument('logfile', help='apache logfile to extract urls from')
+    parser.add_argument(
+        'logfile', help='apache logfile to extract urls from')
 
     return parser
 
@@ -72,3 +95,26 @@ def main(args):
 
 if __name__ == '__main__':
     main(sys.argv[1:])
+
+
+# Demo Notes:
+# TODO: PART A: to trun the log files into url's.
+# we "read through the log file", we "found the pieace of information that points to the image slice"
+# and then we need to build a URL out of it.
+# Todo: Part B: Download those images from the internet
+# we need to check README file, to check the tips of how we should name them.
+# Ultimate Goal is to end up with index.html file ,that we create with the code.
+# that populates " your code" with a punch of <img> tags.
+# <html>
+# <body>
+# <img src="/edu/python/exercises/img0"><img src="/edu/python/exercises/img1"><img src="/edu/python/exercises/img2">...
+# </body>
+# </html>
+# ....so go to the logfile find the information that going to get to the image slice locations ,
+# .. then build urls out of them so u can download them and piece them back together, in an index.html file.
+# Todo:Part C - Image Slice Descrambling:
+# we need to sort them since everything is scrambling:
+# then we should to decode the second puzzle which shows the famous place.
+#
+
+# https://www.programcreek.com/python/?CodeExample=read%20urls
